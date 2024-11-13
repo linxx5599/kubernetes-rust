@@ -31,14 +31,21 @@ cargo check
 
 ```bash
 # Rocket默认配置
+# Rocket默认配置
 [default]
+limits = { form = "64 kB", json = "1 MiB" }
+
+[debug]
 address = "127.0.0.1"  # 服务器监听的IP地址
 port = 8000  # 服务器监听的端口号
+## only the `json` key from `default` will be overridden; `form` will remain
+limits = { json = "10MiB" }
 
 # 生产环境配置
-[production]
-address = "0.0.0.0"  # 生产环境中监听所有网络接口
-port = 80  # 使用80端口以处理HTTP请求
+[release]
+address = "0.0.0.0"  # 服务器监听的IP地址
+ip_header = false
+port = 8000  # 使用8000端口以处理HTTP请求
 ```
 
 ### 基本使用
