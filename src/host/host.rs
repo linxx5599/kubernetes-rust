@@ -2,8 +2,9 @@ use k8s_openapi::apiextensions_apiserver::pkg::apis::apiextensions::v1::{
     CustomResourceDefinitionSpec, CustomResourceDefinitionStatus,
 };
 use k8s_openapi::apimachinery::pkg::apis::meta::v1::ObjectMeta;
+use k8s_openapi::serde::de::{Error, IgnoredAny, MapAccess, Unexpected};
+use k8s_openapi::serde::ser::SerializeStruct;
 use k8s_openapi::{ClusterResourceScope, Resource};
-
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Host {
     pub metadata: ObjectMeta,
@@ -30,7 +31,7 @@ impl k8s_openapi::Metadata for Host {
         &self.metadata
     }
 
-    fn metadata_mut(&mut self) -> &mut<Self as k8s_openapi::Metadata>::Ty {
+    fn metadata_mut(&mut self) -> &mut <Self as k8s_openapi::Metadata>::Ty {
         &mut self.metadata
     }
 }
@@ -44,7 +45,10 @@ impl k8s_openapi::DeepMerge for Host {
 }
 
 impl<'de> k8s_openapi::serde::Deserialize<'de> for Host {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: k8s_openapi::serde::Deserializer<'de> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: k8s_openapi::serde::Deserializer<'de>,
+    {
         #[allow(non_camel_case_types)]
         enum Field {
             Key_api_version,
@@ -56,7 +60,10 @@ impl<'de> k8s_openapi::serde::Deserialize<'de> for Host {
         }
 
         impl<'de> k8s_openapi::serde::Deserialize<'de> for Field {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: k8s_openapi::serde::Deserializer<'de> {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: k8s_openapi::serde::Deserializer<'de>,
+            {
                 struct Visitor;
 
                 impl<'de> k8s_openapi::serde::de::Visitor<'de> for Visitor {
@@ -66,7 +73,10 @@ impl<'de> k8s_openapi::serde::Deserialize<'de> for Host {
                         f.write_str("field identifier")
                     }
 
-                    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E> where E: k8s_openapi::serde::de::Error {
+                    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+                    where
+                        E: k8s_openapi::serde::de::Error,
+                    {
                         Ok(match v {
                             "apiVersion" => Field::Key_api_version,
                             "kind" => Field::Key_kind,
@@ -88,32 +98,43 @@ impl<'de> k8s_openapi::serde::Deserialize<'de> for Host {
             type Value = Host;
 
             fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                f.write_str(<Self::Value as k8s_openapi::Resource>::KIND)
+                f.write_str(<Self::Value as Resource>::KIND)
             }
 
-            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error> where A: k8s_openapi::serde::de::MapAccess<'de> {
+            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
                 let mut value_metadata: Option<ObjectMeta> = None;
                 let mut value_spec: Option<CustomResourceDefinitionSpec> = None;
                 let mut value_status: Option<CustomResourceDefinitionStatus> = None;
 
-                while let Some(key) = k8s_openapi::serde::de::MapAccess::next_key::<Field>(&mut map)? {
+                while let Some(key) = MapAccess::next_key::<Field>(&mut map)? {
                     match key {
                         Field::Key_api_version => {
-                            let value_api_version: String = k8s_openapi::serde::de::MapAccess::next_value(&mut map)?;
-                            if value_api_version != <Self::Value as k8s_openapi::Resource>::API_VERSION {
-                                return Err(k8s_openapi::serde::de::Error::invalid_value(k8s_openapi::serde::de::Unexpected::Str(&value_api_version), &<Self::Value as k8s_openapi::Resource>::API_VERSION));
+                            let value_api_version: String = MapAccess::next_value(&mut map)?;
+                            if value_api_version != <Self::Value as Resource>::API_VERSION {
+                                return Err(Error::invalid_value(
+                                    Unexpected::Str(&value_api_version),
+                                    &<Self::Value as Resource>::API_VERSION,
+                                ));
                             }
-                        },
+                        }
                         Field::Key_kind => {
-                            let value_kind: String = k8s_openapi::serde::de::MapAccess::next_value(&mut map)?;
-                            if value_kind != <Self::Value as k8s_openapi::Resource>::KIND {
-                                return Err(k8s_openapi::serde::de::Error::invalid_value(k8s_openapi::serde::de::Unexpected::Str(&value_kind), &<Self::Value as k8s_openapi::Resource>::KIND));
+                            let value_kind: String = MapAccess::next_value(&mut map)?;
+                            if value_kind != <Self::Value as Resource>::KIND {
+                                return Err(Error::invalid_value(
+                                    Unexpected::Str(&value_kind),
+                                    &<Self::Value as Resource>::KIND,
+                                ));
                             }
-                        },
-                        Field::Key_metadata => value_metadata = k8s_openapi::serde::de::MapAccess::next_value(&mut map)?,
-                        Field::Key_spec => value_spec = k8s_openapi::serde::de::MapAccess::next_value(&mut map)?,
-                        Field::Key_status => value_status = k8s_openapi::serde::de::MapAccess::next_value(&mut map)?,
-                        Field::Other => { let _: k8s_openapi::serde::de::IgnoredAny = k8s_openapi::serde::de::MapAccess::next_value(&mut map)?; },
+                        }
+                        Field::Key_metadata => value_metadata = MapAccess::next_value(&mut map)?,
+                        Field::Key_spec => value_spec = MapAccess::next_value(&mut map)?,
+                        Field::Key_status => value_status = MapAccess::next_value(&mut map)?,
+                        Field::Other => {
+                            let _: IgnoredAny = MapAccess::next_value(&mut map)?;
+                        }
                     }
                 }
 
@@ -126,34 +147,34 @@ impl<'de> k8s_openapi::serde::Deserialize<'de> for Host {
         }
 
         deserializer.deserialize_struct(
-            <Self as k8s_openapi::Resource>::KIND,
-            &[
-                "apiVersion",
-                "kind",
-                "metadata",
-                "spec",
-                "status",
-            ],
+            <Self as Resource>::KIND,
+            &["apiVersion", "kind", "metadata", "spec", "status"],
             Visitor,
         )
     }
 }
 
 impl k8s_openapi::serde::Serialize for Host {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: k8s_openapi::serde::Serializer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: k8s_openapi::serde::Serializer,
+    {
         let mut state = serializer.serialize_struct(
-            <Self as k8s_openapi::Resource>::KIND,
-            4 +
-            self.status.as_ref().map_or(0, |_| 1),
+            <Self as Resource>::KIND,
+            4 + self.status.as_ref().map_or(0, |_| 1),
         )?;
-        k8s_openapi::serde::ser::SerializeStruct::serialize_field(&mut state, "apiVersion", <Self as k8s_openapi::Resource>::API_VERSION)?;
-        k8s_openapi::serde::ser::SerializeStruct::serialize_field(&mut state, "kind", <Self as k8s_openapi::Resource>::KIND)?;
-        k8s_openapi::serde::ser::SerializeStruct::serialize_field(&mut state, "metadata", &self.metadata)?;
-        k8s_openapi::serde::ser::SerializeStruct::serialize_field(&mut state, "spec", &self.spec)?;
+        SerializeStruct::serialize_field(
+            &mut state,
+            "apiVersion",
+            <Self as Resource>::API_VERSION,
+        )?;
+        SerializeStruct::serialize_field(&mut state, "kind", <Self as Resource>::KIND)?;
+        SerializeStruct::serialize_field(&mut state, "metadata", &self.metadata)?;
+        SerializeStruct::serialize_field(&mut state, "spec", &self.spec)?;
         if let Some(value) = &self.status {
-            k8s_openapi::serde::ser::SerializeStruct::serialize_field(&mut state, "status", value)?;
+            SerializeStruct::serialize_field(&mut state, "status", value)?;
         }
-        k8s_openapi::serde::ser::SerializeStruct::end(state)
+        SerializeStruct::end(state)
     }
 }
 
@@ -163,7 +184,9 @@ impl k8s_openapi::schemars::JsonSchema for Host {
         "io.k8s.api.core.v1.Host".to_owned()
     }
 
-    fn json_schema(__gen: &mut k8s_openapi::schemars::gen::SchemaGenerator) -> k8s_openapi::schemars::schema::Schema {
+    fn json_schema(
+        __gen: &mut k8s_openapi::schemars::gen::SchemaGenerator,
+    ) -> k8s_openapi::schemars::schema::Schema {
         k8s_openapi::schemars::schema::Schema::Object(k8s_openapi::schemars::schema::SchemaObject {
             metadata: Some(Box::new(k8s_openapi::schemars::schema::Metadata {
                 description: Some("Host is a worker node in Kubernetes. Each host will have a unique identifier in the cache (i.e. in etcd).".to_owned()),
