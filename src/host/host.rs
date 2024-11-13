@@ -24,7 +24,7 @@ impl k8s_openapi::ListableResource for Host {
 }
 
 impl k8s_openapi::Metadata for Host {
-    type Ty = k8s_openapi::apimachinery::pkg::apis::meta::v1::ObjectMeta;
+    type Ty = ObjectMeta;
 
     fn metadata(&self) -> &<Self as k8s_openapi::Metadata>::Ty {
         &self.metadata
@@ -92,9 +92,9 @@ impl<'de> k8s_openapi::serde::Deserialize<'de> for Host {
             }
 
             fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error> where A: k8s_openapi::serde::de::MapAccess<'de> {
-                let mut value_metadata: Option<k8s_openapi::apimachinery::pkg::apis::meta::v1::ObjectMeta> = None;
-                let mut value_spec: Option<k8s_openapi::apiextensions_apiserver::pkg::apis::apiextensions::v1::CustomResourceDefinitionSpec> = None;
-                let mut value_status: Option<k8s_openapi::apiextensions_apiserver::pkg::apis::apiextensions::v1::CustomResourceDefinitionStatus> = None;
+                let mut value_metadata: Option<ObjectMeta> = None;
+                let mut value_spec: Option<CustomResourceDefinitionSpec> = None;
+                let mut value_status: Option<CustomResourceDefinitionStatus> = None;
 
                 while let Some(key) = k8s_openapi::serde::de::MapAccess::next_key::<Field>(&mut map)? {
                     match key {
@@ -158,15 +158,15 @@ impl k8s_openapi::serde::Serialize for Host {
 }
 
 #[cfg(feature = "schemars")]
-impl k8s_openapi::schemars::JsonSchema for Node {
+impl k8s_openapi::schemars::JsonSchema for Host {
     fn schema_name() -> String {
-        "io.k8s.api.core.v1.Node".to_owned()
+        "io.k8s.api.core.v1.Host".to_owned()
     }
 
     fn json_schema(__gen: &mut k8s_openapi::schemars::gen::SchemaGenerator) -> k8s_openapi::schemars::schema::Schema {
         k8s_openapi::schemars::schema::Schema::Object(k8s_openapi::schemars::schema::SchemaObject {
             metadata: Some(Box::new(k8s_openapi::schemars::schema::Metadata {
-                description: Some("Node is a worker node in Kubernetes. Each node will have a unique identifier in the cache (i.e. in etcd).".to_owned()),
+                description: Some("Host is a worker node in Kubernetes. Each host will have a unique identifier in the cache (i.e. in etcd).".to_owned()),
                 ..Default::default()
             })),
             instance_type: Some(k8s_openapi::schemars::schema::SingleOrVec::Single(Box::new(k8s_openapi::schemars::schema::InstanceType::Object))),
@@ -197,7 +197,7 @@ impl k8s_openapi::schemars::JsonSchema for Node {
                     (
                         "metadata".to_owned(),
                         {
-                            let mut schema_obj = __gen.subschema_for::<k8s_openapi::apimachinery::pkg::apis::meta::v1::ObjectMeta>().into_object();
+                            let mut schema_obj = __gen.subschema_for::<ObjectMeta>().into_object();
                             schema_obj.metadata = Some(Box::new(k8s_openapi::schemars::schema::Metadata {
                                 description: Some("Standard object's metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata".to_owned()),
                                 ..Default::default()
@@ -208,9 +208,9 @@ impl k8s_openapi::schemars::JsonSchema for Node {
                     (
                         "spec".to_owned(),
                         {
-                            let mut schema_obj = __gen.subschema_for::<k8s_openapi::api::core::v1::NodeSpec>().into_object();
+                            let mut schema_obj = __gen.subschema_for::<CustomResourceDefinitionSpec>().into_object();
                             schema_obj.metadata = Some(Box::new(k8s_openapi::schemars::schema::Metadata {
-                                description: Some("Spec defines the behavior of a node. https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status".to_owned()),
+                                description: Some("Spec defines the behavior of a host. https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status".to_owned()),
                                 ..Default::default()
                             }));
                             k8s_openapi::schemars::schema::Schema::Object(schema_obj)
@@ -219,9 +219,9 @@ impl k8s_openapi::schemars::JsonSchema for Node {
                     (
                         "status".to_owned(),
                         {
-                            let mut schema_obj = __gen.subschema_for::<k8s_openapi::api::core::v1::NodeStatus>().into_object();
+                            let mut schema_obj = __gen.subschema_for::<CustomResourceDefinitionStatus>().into_object();
                             schema_obj.metadata = Some(Box::new(k8s_openapi::schemars::schema::Metadata {
-                                description: Some("Most recently observed status of the node. Populated by the system. Read-only. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status".to_owned()),
+                                description: Some("Most recently observed status of the host. Populated by the system. Read-only. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status".to_owned()),
                                 ..Default::default()
                             }));
                             k8s_openapi::schemars::schema::Schema::Object(schema_obj)
