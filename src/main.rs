@@ -6,6 +6,9 @@ mod controllers;
 
 use rocket_cors::{AllowedHeaders, AllowedOrigins, CorsOptions};
 
+#[path = "./utils.rs"]
+mod utils;
+
 #[path = "./mod.rs"]
 mod common_mod;
 #[path = "./client.rs"]

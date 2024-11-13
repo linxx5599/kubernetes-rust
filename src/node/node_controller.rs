@@ -6,13 +6,13 @@ mod node_service;
 
 #[get("/node")]
 async fn get_node() -> Value {
-    let result= node_service::get_node().await;
+    let result = node_service::get_node().await;
     json!(result)
 }
 
 #[post("/node")]
-fn create_node() -> &'static str {
-    "Hello, node!"
+fn create_node() -> Value {
+    json!("Hello, node!")
 }
 
 // 定义一个函数来返回所有路由

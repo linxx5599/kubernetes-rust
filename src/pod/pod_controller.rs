@@ -6,13 +6,13 @@ mod pod_service;
 
 #[get("/pod")]
 async fn get_pod() -> Value {
-    let result= pod_service::get_pod().await;
+    let result = pod_service::get_pod().await;
     json!(result)
 }
 
 #[post("/pod")]
-fn create_pod() -> &'static str {
-    "Hello, pod!"
+fn create_pod() -> Value {
+    json!("Hello, pod!")
 }
 
 // 定义一个函数来返回所有路由
