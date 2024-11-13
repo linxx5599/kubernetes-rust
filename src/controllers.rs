@@ -4,3 +4,5 @@ pub mod node_controller;
 pub mod pod_controller;
 #[path = "./host/host_controller.rs"]
 pub mod host_controller;
+#[path = "./namespace/namespace_controller.rs"]
+pub mod namespace_controller;

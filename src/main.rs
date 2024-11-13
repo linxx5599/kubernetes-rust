@@ -29,5 +29,6 @@ fn rocket() -> rocket::Rocket<rocket::Build> {
         .mount("/", controllers::node_controller::routes())
         .mount("/", controllers::pod_controller::routes())
         .mount("/", controllers::host_controller::routes())
+        .mount("/", controllers::namespace_controller::routes())
         
 }
