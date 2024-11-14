@@ -25,7 +25,7 @@ pub async fn get_host(params: utils::PaginationParams) -> Value {
         }
         Err(err) => {
             json!({
-                "code": 500,
+                "code": 400,
                 "message": get_root_error(&err).to_string(),
             })
         }

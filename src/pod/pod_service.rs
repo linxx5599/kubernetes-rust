@@ -1,9 +1,11 @@
 use k8s_openapi::api::core::v1::Pod;
+use kube::api::{Patch, PatchParams, PostParams};
 use kube::{api::ObjectList, Api};
+use rocket::serde::json::Json;
 use serde_json::{json, to_value, Value};
 
-use crate::kube_client;
 use crate::common_mod::get_root_error;
+use crate::kube_client;
 
 pub async fn get_pod() -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
@@ -17,9 +19,43 @@ pub async fn get_pod() -> Value {
             return pod_value;
         }
         Err(err) => {
-            let mut msg = String::from("504: Gateway Timeout");
-            msg.push_str(&get_root_error(&err).to_string());
-            json!(&msg)
-        },
+            json!({
+                "code": 400,
+                "message": get_root_error(&err).to_string(),
+            })
+        }
+    }
+}
+
+pub async fn create_pod(ns: &str, pod_body: Json<Pod>) -> Value {
+    let client = kube_client::MKubeClient::new().await.unwrap();
+    let pods: Api<Pod> = Api::namespaced(client, ns);
+    let data = pod_body.into_inner();
+    let params = PostParams::default();
+    match pods.create(&params, &data).await {
+        Ok(pod) => json!(&pod),
+        Err(err) => {
+            json!({
+                "code": 400,
+                "message": get_root_error(&err).to_string(),
+            })
+        }
+    }
+}
+
+pub async fn update_pod(name: &str, ns: &str, pod_body: Json<Pod>) -> Value {
+    let client = kube_client::MKubeClient::new().await.unwrap();
+    let pods: Api<Pod> = Api::namespaced(client, ns);
+    let patch = pod_body.into_inner();
+    let params = PatchParams::default();
+    let patch = Patch::Apply(&patch);
+    match pods.patch(name, &params, &patch).await {
+        Ok(pod) => json!(&pod),
+        Err(err) => {
+            json!({
+                "code": 400,
+                "message": get_root_error(&err).to_string(),
+            })
+        }
     }
 }
