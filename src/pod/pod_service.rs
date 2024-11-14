@@ -69,7 +69,7 @@ pub async fn delete_pod(name: &str, ns: &str) -> Value {
             Some(pod) => json!(pod),
             None => json!({
                 "code": 400,
-                "message": "pod not found",
+                "message": format!("pods {} not found: NotFound", name),
             }),
         },
         Err(err) => {
