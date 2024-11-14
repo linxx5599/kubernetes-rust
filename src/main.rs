@@ -1,21 +1,17 @@
-#[macro_use]
 extern crate rocket; // 引入Rocket宏
-
-#[path = "./controllers.rs"]
-mod controllers;
 
 use rocket_cors::{AllowedHeaders, AllowedOrigins, CorsOptions};
 
-#[path = "./utils.rs"]
-mod utils;
-
-#[path = "./mod.rs"]
-mod common_mod;
-#[path = "./client.rs"]
-mod kube_client;
+// 引入模块
+#[path = "./lib/lib.rs"]
+mod lib;
+use lib::common_mod;
+use lib::controllers;
+use lib::kube_client;
+use lib::utils;
 
 // 启动Rocket服务器并挂载路由
-#[launch]
+#[rocket::launch]
 fn rocket() -> rocket::Rocket<rocket::Build> {
     // 设置CORS配置 attach(cors)
     let allowed_origins = AllowedOrigins::all();

@@ -1,4 +1,4 @@
-use rocket::Route;
+use rocket::{get, post, routes, Route};
 use serde_json::{json, Value};
 
 #[path = "./node_service.rs"]
