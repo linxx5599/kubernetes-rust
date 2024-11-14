@@ -13,7 +13,7 @@ mod utils;
 mod common_mod;
 #[path = "./client.rs"]
 mod kube_client;
- 
+
 // 启动Rocket服务器并挂载路由
 #[launch]
 fn rocket() -> rocket::Rocket<rocket::Build> {
@@ -33,5 +33,4 @@ fn rocket() -> rocket::Rocket<rocket::Build> {
         .mount("/", controllers::pod_controller::routes())
         .mount("/", controllers::host_controller::routes())
         .mount("/", controllers::namespace_controller::routes())
-        
 }

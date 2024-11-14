@@ -9,11 +9,12 @@ use crate::{kube_client, utils};
 mod host;
 
 pub async fn get_host(params: utils::PaginationParams) -> Value {
-    println!("get_host params:{:#?}", params);
     let client = kube_client::MKubeClient::new().await.unwrap();
     //查询k3s下所有的hosts
     let mut list_params = ListParams::default();
-    list_params.limit = params.limit.parse::<u32>().ok();
+    if params.limit != "" {
+        list_params.limit = params.limit.parse::<u32>().ok();
+    }
     let host_api: Api<host::Host> = Api::<host::Host>::all(client);
     let result: Result<ObjectList<host::Host>, kube::Error> = host_api.list(&list_params).await;
     match result {
@@ -23,9 +24,10 @@ pub async fn get_host(params: utils::PaginationParams) -> Value {
             return host_value;
         }
         Err(err) => {
-            let mut msg = String::from("504: Gateway Timeout");
-            msg.push_str(&get_root_error(&err).to_string());
-            json!(&msg)
+            json!({
+                "code": 500,
+                "message": get_root_error(&err).to_string(),
+            })
         }
     }
 }

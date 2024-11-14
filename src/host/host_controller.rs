@@ -7,7 +7,7 @@ mod host_service;
 
 #[get("/host?<limit>")]
 async fn get_host(limit: Option<&str>) -> Value {
-    let limit = utils::validate_and_set_value::<i32>(limit, "10");
+    let limit = utils::validate_and_set_value::<i32>(limit);
     let params = utils::PaginationParams { limit };
     //接收query参数
     let result = host_service::get_host(params).await;
