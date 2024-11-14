@@ -1,5 +1,5 @@
 use k8s_openapi::api::core::v1::Pod;
-use kube::api::{Patch, PatchParams, PostParams};
+use kube::api::{DeleteParams, Patch, PatchParams, PostParams};
 use kube::{api::ObjectList, Api};
 use rocket::serde::json::Json;
 use serde_json::{json, to_value, Value};
@@ -51,6 +51,27 @@ pub async fn update_pod(name: &str, ns: &str, pod_body: Json<Pod>) -> Value {
     let patch = Patch::Apply(&patch);
     match pods.patch(name, &params, &patch).await {
         Ok(pod) => json!(&pod),
+        Err(err) => {
+            json!({
+                "code": 400,
+                "message": get_root_error(&err).to_string(),
+            })
+        }
+    }
+}
+
+pub async fn delete_pod(name: &str, ns: &str) -> Value {
+    let client = kube_client::MKubeClient::new().await.unwrap();
+    let pods: Api<Pod> = Api::namespaced(client, ns);
+    let params = DeleteParams::default();
+    match pods.delete(name, &params).await {
+        Ok(resp) => match &resp.left() {
+            Some(pod) => json!(pod),
+            None => json!({
+                "code": 400,
+                "message": "pod not found",
+            }),
+        },
         Err(err) => {
             json!({
                 "code": 400,

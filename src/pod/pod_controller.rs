@@ -1,6 +1,6 @@
 use crate::lib::utils;
 use k8s_openapi::api::core::v1::Pod;
-use rocket::{get, post, put, routes, serde::json::Json, Route};
+use rocket::{delete, get, post, put, routes, serde::json::Json, Route};
 use serde_json::{json, Value};
 
 #[path = "./pod_service.rs"]
@@ -51,7 +51,21 @@ async fn update_pod(name: Option<&str>, ns: Option<&str>, pod_body: Json<Pod>) -
     }
 }
 
+#[delete("/pod?<name>&<ns>")]
+async fn delete_pod(name: Option<&str>, ns: Option<&str>) -> Value {
+    let name = utils::validate_and_set_str::<i32>(name);
+    let ns = utils::validate_and_set_str::<i32>(ns);
+    if name.is_empty() {
+        return json!({"code": 400, "message": "name is empty"});
+    }
+    if ns.is_empty() {
+        return json!({"code": 400, "message": "namespace is empty"});
+    }
+    let result = pod_service::delete_pod(&name, &ns).await;
+    json!(result)
+}
+
 // 定义一个函数来返回所有路由
 pub fn routes() -> Vec<Route> {
-    routes![get_pod, create_pod, update_pod]
+    routes![get_pod, create_pod, update_pod, delete_pod]
 }
