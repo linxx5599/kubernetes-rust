@@ -1,5 +1,6 @@
 use std::io::Cursor;
 
+use regex::Regex;
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::Status;
 use rocket::tokio::io::AsyncReadExt;
@@ -34,17 +35,25 @@ impl Fairing for JsonResponseFairing {
                             let body_json: serde_json::Value =
                                 serde_json::from_str(&body_str).unwrap();
                             // 如果body_json是object
-                            if body_json.is_object() {
+                            if body_json.is_object()
+                                && body_json.as_object().unwrap().contains_key("code")
+                            {
                                 let body_json = body_json.as_object().unwrap();
-                                if body_json.contains_key("code") {
-                                    status_code = body_json["code"].as_u64().unwrap() as u16;
-                                    _response["status"] = status_code.clone().into();
-                                    if body_json.contains_key("message") {
-                                        _response["message"] = body_json["message"].clone();
-                                    }
+                                status_code = body_json["code"].as_u64().unwrap() as u16;
+                                _response["status"] = status_code.clone().into();
+                                if body_json.contains_key("message") {
+                                    _response["message"] = body_json["message"].clone();
                                 }
                             } else {
-                                _response["data"] = body_json;
+                                _response["data"] = body_json.clone().into();
+                                _response["message"] = "操作成功".into();
+                            }
+                        } else {
+                            let re = Regex::new(r#"<title>(.*?)</title>"#).unwrap();
+                            if let Some(captures) = re.captures(&body_str) {
+                                if let Some(title_content) = captures.get(1) {
+                                    _response["message"] = title_content.as_str().into();
+                                }
                             }
                         }
                         response.set_status(Status::from_code(status_code).unwrap());

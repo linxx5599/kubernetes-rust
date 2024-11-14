@@ -1848,6 +1848,7 @@ dependencies = [
  "k8s-openapi",
  "kube",
  "kube-client",
+ "regex",
  "rocket",
  "rocket_cors",
  "schemars",
