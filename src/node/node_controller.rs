@@ -1,9 +1,8 @@
+use crate::utils;
 use k8s_openapi::api::core::v1::Node;
 use rocket::serde::json::Json;
 use rocket::{delete, get, post, put, routes, Route};
 use serde_json::{json, Value};
-
-use crate::utils;
 
 mod node_service;
 

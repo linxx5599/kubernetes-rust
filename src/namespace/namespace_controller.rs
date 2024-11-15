@@ -1,9 +1,8 @@
+use crate::utils;
 use k8s_openapi::api::core::v1::Namespace;
 use rocket::serde::json::Json;
 use rocket::{delete, get, post, put, routes, Route};
 use serde_json::{json, Value};
-
-use crate::utils;
 
 mod namespace_service;
 
@@ -55,5 +54,10 @@ async fn delete_namespace(name: Option<&str>) -> Value {
 
 // 定义一个函数来返回所有路由
 pub fn routes() -> Vec<Route> {
-    routes![get_namespace, create_namespace, update_namespace, delete_namespace]
+    routes![
+        get_namespace,
+        create_namespace,
+        update_namespace,
+        delete_namespace
+    ]
 }
