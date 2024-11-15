@@ -71,7 +71,7 @@ ip_header = false
 port = 8000  # 使用8000端口以处理HTTP请求
 ```
 
-## 基本使用 已 node 资源为例子
+## 基本使用 以 node 资源为例子
 
 ### node_controller.rs 内容
 
