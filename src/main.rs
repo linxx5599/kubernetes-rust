@@ -26,6 +26,7 @@ fn rocket() -> rocket::Rocket<rocket::Build> {
         .attach(common::json_response::JsonResponseFairing)
         .mount("/", common::controllers::node_controller::routes())
         .mount("/", common::controllers::pod_controller::routes())
-        .mount("/", common::controllers::host_controller::routes())
         .mount("/", common::controllers::namespace_controller::routes())
+        .mount("/", common::controllers::host_controller::routes())
+        .mount("/", common::controllers::vm_controller::routes())
 }
