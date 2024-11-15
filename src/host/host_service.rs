@@ -1,6 +1,8 @@
-use crate::common_mod::get_root_error;
-use crate::{host, kube_client, utils};
+use crate::common::api::host::Host;
+use crate::utils::get_root_error;
+use crate::{kube_client, utils};
 use kube::api::{DeleteParams, ListParams, PostParams};
+use kube::core::response::StatusSummary;
 use kube::{api::ObjectList, Api};
 use rocket::serde::json::Json;
 use serde_json::{json, to_value, Value};
@@ -12,8 +14,8 @@ pub async fn get_host(params: utils::PaginationParams) -> Value {
     if params.limit != "" {
         list_params.limit = params.limit.parse::<u32>().ok();
     }
-    let host_api: Api<host::Host> = Api::<host::Host>::all(client);
-    let result: Result<ObjectList<host::Host>, kube::Error> = host_api.list(&list_params).await;
+    let host_api: Api<Host> = Api::<Host>::all(client);
+    let result: Result<ObjectList<Host>, kube::Error> = host_api.list(&list_params).await;
     match result {
         Ok(hosts) => {
             // 处理成功的结果
@@ -29,9 +31,9 @@ pub async fn get_host(params: utils::PaginationParams) -> Value {
     }
 }
 
-pub async fn create_host(host_body: Json<host::Host>) -> Value {
+pub async fn create_host(host_body: Json<Host>) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
-    let host_api: Api<host::Host> = Api::all(client);
+    let host_api: Api<Host> = Api::all(client);
     let data = host_body.into_inner();
     let params = PostParams::default();
     match host_api.create(&params, &data).await {
@@ -45,9 +47,9 @@ pub async fn create_host(host_body: Json<host::Host>) -> Value {
     }
 }
 
-pub async fn update_host(name: &str, host_body: Json<host::Host>) -> Value {
+pub async fn update_host(name: &str, host_body: Json<Host>) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
-    let host_api: Api<host::Host> = Api::all(client);
+    let host_api: Api<Host> = Api::all(client);
     let mut data = host_body.into_inner();
     //判断是否有 data.metadata.resourceVersion
     if data.metadata.resource_version.is_none() {
@@ -77,14 +79,22 @@ pub async fn update_host(name: &str, host_body: Json<host::Host>) -> Value {
 
 pub async fn delete_host(name: &str) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
-    let host_api: Api<host::Host> = Api::all(client);
+    let host_api: Api<Host> = Api::all(client);
     let params = DeleteParams::default();
     match host_api.delete(name, &params).await {
-        Ok(resp) => match &resp.left() {
-            Some(host) => json!(host),
+        Ok(resp) => match &resp.right() {
+            Some(status) => {
+                if &status.status.unwrap() == &StatusSummary::Success {
+                    return json!(&status.details);
+                }
+                return json!({
+                    "code": 400,
+                    "message": &status.message,
+                });
+            }
             None => json!({
                 "code": 400,
-                "message": format!("hosts {} not found: NotFound", name),
+                "message": format!("hosts.virt.cum.io hosts {} not found: NotFound", name),
             }),
         },
         Err(err) => {

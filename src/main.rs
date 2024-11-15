@@ -3,13 +3,11 @@ extern crate rocket; // 引入Rocket宏
 use rocket_cors::{AllowedHeaders, AllowedOrigins, CorsOptions};
 
 // 引入模块
-#[path = "./lib/lib.rs"]
-mod lib;
-use lib::common_mod;
-use lib::controllers;
-use lib::kube_client;
-use lib::utils;
-use lib::host;
+mod config;
+
+mod common;
+use common::kube_client;
+use common::utils;
 
 // 启动Rocket服务器并挂载路由
 #[rocket::launch]
@@ -25,9 +23,9 @@ fn rocket() -> rocket::Rocket<rocket::Build> {
     .expect("Failed to create CORS");
     rocket::build()
         .attach(cors)
-        .attach(common_mod::JsonResponseFairing)
-        .mount("/", controllers::node_controller::routes())
-        .mount("/", controllers::pod_controller::routes())
-        .mount("/", controllers::host_controller::routes())
-        .mount("/", controllers::namespace_controller::routes())
+        .attach(common::json_response::JsonResponseFairing)
+        .mount("/", common::controllers::node_controller::routes())
+        .mount("/", common::controllers::pod_controller::routes())
+        .mount("/", common::controllers::host_controller::routes())
+        .mount("/", common::controllers::namespace_controller::routes())
 }

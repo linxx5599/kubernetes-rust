@@ -4,7 +4,7 @@ use kube::{api::ObjectList, Api};
 use rocket::serde::json::Json;
 use serde_json::{json, to_value, Value};
 
-use crate::common_mod::get_root_error;
+use crate::utils::get_root_error;
 use crate::kube_client;
 
 pub async fn get_node() -> Value {

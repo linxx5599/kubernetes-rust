@@ -1,4 +1,5 @@
-use crate::{host, utils};
+use crate::common::api::host::Host;
+use crate::utils;
 use rocket::serde::json::Json;
 use rocket::{delete, get, post, put, routes, Route};
 use serde_json::{json, Value};
@@ -15,7 +16,7 @@ async fn get_host(limit: Option<&str>) -> Value {
 }
 
 #[post("/host", data = "<host_body>")]
-async fn create_host(host_body: Json<host::Host>) -> Value {
+async fn create_host(host_body: Json<Host>) -> Value {
     match Some(host_body) {
         Some(params) => {
             let result = host_service::create_host(params).await;
@@ -28,7 +29,7 @@ async fn create_host(host_body: Json<host::Host>) -> Value {
 }
 
 #[put("/host?<name>", data = "<host_body>")]
-async fn update_host(name: Option<&str>, host_body: Json<host::Host>) -> Value {
+async fn update_host(name: Option<&str>, host_body: Json<Host>) -> Value {
     let name = utils::validate_and_set_str::<i32>(name);
     if name.is_empty() {
         return json!({"code": 400, "message": "name is empty"});

@@ -3,7 +3,7 @@ use rocket::serde::json::Json;
 use rocket::{delete, get, post, put, routes, Route};
 use serde_json::{json, Value};
 
-use crate::lib::utils;
+use crate::utils;
 
 #[path = "./namespace_service.rs"]
 mod namespace_service;

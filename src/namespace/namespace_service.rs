@@ -1,4 +1,4 @@
-use crate::common_mod::get_root_error;
+use crate::utils::get_root_error;
 use crate::kube_client;
 use k8s_openapi::api::core::v1::Namespace;
 use kube::api::{DeleteParams, PostParams};

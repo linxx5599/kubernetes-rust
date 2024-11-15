@@ -74,11 +74,3 @@ impl Fairing for JsonResponseFairing {
         }
     }
 }
-
-pub fn get_root_error(err: &dyn std::error::Error) -> &dyn std::error::Error {
-    let mut current_err = err;
-    while let Some(source) = current_err.source() {
-        current_err = source;
-    }
-    current_err
-}

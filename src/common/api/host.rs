@@ -5,6 +5,9 @@ use k8s_openapi::apimachinery::pkg::apis::meta::v1::ObjectMeta;
 use k8s_openapi::serde::de::{Error, IgnoredAny, MapAccess, Unexpected};
 use k8s_openapi::serde::ser::SerializeStruct;
 use k8s_openapi::{ClusterResourceScope, Resource};
+
+use crate::config::crd;
+
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Host {
     pub metadata: ObjectMeta,
@@ -13,11 +16,11 @@ pub struct Host {
 }
 
 impl Resource for Host {
-    const API_VERSION: &'static str = "virt.cum.io/v1";
-    const GROUP: &'static str = "virt.cum.io";
-    const KIND: &'static str = "Host";
-    const VERSION: &'static str = "v1";
-    const URL_PATH_SEGMENT: &'static str = "hosts";
+    const API_VERSION: &'static str = crd::HOST_API_VERSION;
+    const GROUP: &'static str = crd::HOST_GROUP;
+    const KIND: &'static str = crd::HOST;
+    const VERSION: &'static str = crd::HOST_VERSION;
+    const URL_PATH_SEGMENT: &'static str = crd::HOST_URL_PATH_SEGMENT;
     type Scope = ClusterResourceScope;
 }
 impl k8s_openapi::ListableResource for Host {
