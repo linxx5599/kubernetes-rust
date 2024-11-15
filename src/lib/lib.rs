@@ -9,3 +9,6 @@ pub mod common_mod;
 
 #[path = "./client.rs"]
 pub mod kube_client;
+
+#[path = "./host.rs"]
+pub mod host;

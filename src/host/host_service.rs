@@ -1,12 +1,9 @@
-use kube::api::{ListParams, ObjectList};
-use kube::Api;
-use serde_json::{json, to_value, Value};
-
 use crate::common_mod::get_root_error;
-use crate::{kube_client, utils};
-
-#[path = "./host.rs"]
-mod host;
+use crate::{host, kube_client, utils};
+use kube::api::{DeleteParams, ListParams, Patch, PatchParams, PostParams};
+use kube::{api::ObjectList, Api};
+use rocket::serde::json::Json;
+use serde_json::{json, to_value, Value};
 
 pub async fn get_host(params: utils::PaginationParams) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
@@ -23,6 +20,60 @@ pub async fn get_host(params: utils::PaginationParams) -> Value {
             let host_value = to_value(&hosts).unwrap();
             return host_value;
         }
+        Err(err) => {
+            json!({
+                "code": 400,
+                "message": get_root_error(&err).to_string(),
+            })
+        }
+    }
+}
+
+pub async fn create_host(host_body: Json<host::Host>) -> Value {
+    let client = kube_client::MKubeClient::new().await.unwrap();
+    let hosts: Api<host::Host> = Api::all(client);
+    let data = host_body.into_inner();
+    let params = PostParams::default();
+    match hosts.create(&params, &data).await {
+        Ok(host) => json!(&host),
+        Err(err) => {
+            json!({
+                "code": 400,
+                "message": get_root_error(&err).to_string(),
+            })
+        }
+    }
+}
+
+pub async fn update_host(name: &str, host_body: Json<host::Host>) -> Value {
+    let client = kube_client::MKubeClient::new().await.unwrap();
+    let hosts: Api<host::Host> = Api::all(client);
+    let patch = host_body.into_inner();
+    let params = PatchParams::apply("myapp");
+    let patch = Patch::Apply(&patch);
+    match hosts.patch(name, &params, &patch).await {
+        Ok(host) => json!(&host),
+        Err(err) => {
+            json!({
+                "code": 400,
+                "message": get_root_error(&err).to_string(),
+            })
+        }
+    }
+}
+
+pub async fn delete_host(name: &str) -> Value {
+    let client = kube_client::MKubeClient::new().await.unwrap();
+    let hosts: Api<host::Host> = Api::all(client);
+    let params = DeleteParams::default();
+    match hosts.delete(name, &params).await {
+        Ok(resp) => match &resp.left() {
+            Some(host) => json!(host),
+            None => json!({
+                "code": 400,
+                "message": format!("hosts {} not found: NotFound", name),
+            }),
+        },
         Err(err) => {
             json!({
                 "code": 400,

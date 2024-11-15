@@ -9,6 +9,7 @@ use lib::common_mod;
 use lib::controllers;
 use lib::kube_client;
 use lib::utils;
+use lib::host;
 
 // 启动Rocket服务器并挂载路由
 #[rocket::launch]
