@@ -19,9 +19,10 @@ pub async fn get_node() -> Value {
             return node_value;
         }
         Err(err) => {
-            let mut msg = String::from("504: Gateway Timeout");
-            msg.push_str(&get_root_error(&err).to_string());
-            json!(&msg)
+            json!({
+                "code": 400,
+                "message": get_root_error(&err).to_string(),
+            })
         }
     }
 }
@@ -46,7 +47,7 @@ pub async fn update_node(name: &str, pod_body: Json<Node>) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
     let nodes: Api<Node> = Api::all(client);
     let patch = pod_body.into_inner();
-    let params = PatchParams::default();
+    let params = PatchParams::apply("myapp");
     let patch = Patch::Apply(&patch);
     match nodes.patch(name, &params, &patch).await {
         Ok(pod) => json!(&pod),

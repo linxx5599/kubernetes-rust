@@ -47,7 +47,7 @@ pub async fn update_pod(name: &str, ns: &str, pod_body: Json<Pod>) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
     let pods: Api<Pod> = Api::namespaced(client, ns);
     let patch = pod_body.into_inner();
-    let params = PatchParams::default();
+    let params = PatchParams::apply("myapp");
     let patch = Patch::Apply(&patch);
     match pods.patch(name, &params, &patch).await {
         Ok(pod) => json!(&pod),
