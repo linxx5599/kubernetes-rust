@@ -1,6 +1,6 @@
 use crate::common_mod::get_root_error;
 use crate::{host, kube_client, utils};
-use kube::api::{DeleteParams, ListParams, Patch, PatchParams, PostParams};
+use kube::api::{DeleteParams, ListParams, PostParams};
 use kube::{api::ObjectList, Api};
 use rocket::serde::json::Json;
 use serde_json::{json, to_value, Value};
@@ -47,11 +47,24 @@ pub async fn create_host(host_body: Json<host::Host>) -> Value {
 
 pub async fn update_host(name: &str, host_body: Json<host::Host>) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
-    let hosts: Api<host::Host> = Api::all(client);
-    let patch = host_body.into_inner();
-    let params = PatchParams::apply("myapp");
-    let patch = Patch::Apply(&patch);
-    match hosts.patch(name, &params, &patch).await {
+    let host_api: Api<host::Host> = Api::all(client);
+    let mut data = host_body.into_inner();
+    //判断是否有 data.metadata.resourceVersion
+    if data.metadata.resource_version.is_none() {
+        match host_api.get(name).await {
+            Ok(host) => {
+                data.metadata.resource_version = host.metadata.resource_version;
+            }
+            Err(err) => {
+                return json!({
+                    "code": 400,
+                    "message": get_root_error(&err).to_string(),
+                });
+            }
+        }
+    }
+    let params = PostParams::default();
+    match host_api.replace(name, &params, &data).await {
         Ok(host) => json!(&host),
         Err(err) => {
             json!({
