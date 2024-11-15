@@ -1,5 +1,5 @@
 use k8s_openapi::api::core::v1::Pod;
-use kube::api::{DeleteParams, Patch, PatchParams, PostParams};
+use kube::api::{DeleteParams, PostParams};
 use kube::{api::ObjectList, Api};
 use rocket::serde::json::Json;
 use serde_json::{json, to_value, Value};
@@ -29,10 +29,10 @@ pub async fn get_pod() -> Value {
 
 pub async fn create_pod(ns: &str, pod_body: Json<Pod>) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
-    let pods: Api<Pod> = Api::namespaced(client, ns);
+    let pod_api: Api<Pod> = Api::namespaced(client, ns);
     let data = pod_body.into_inner();
     let params = PostParams::default();
-    match pods.create(&params, &data).await {
+    match pod_api.create(&params, &data).await {
         Ok(pod) => json!(&pod),
         Err(err) => {
             json!({
@@ -45,11 +45,24 @@ pub async fn create_pod(ns: &str, pod_body: Json<Pod>) -> Value {
 
 pub async fn update_pod(name: &str, ns: &str, pod_body: Json<Pod>) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
-    let pods: Api<Pod> = Api::namespaced(client, ns);
-    let patch = pod_body.into_inner();
-    let params = PatchParams::apply("myapp");
-    let patch = Patch::Apply(&patch);
-    match pods.patch(name, &params, &patch).await {
+    let pod_api: Api<Pod> = Api::namespaced(client, ns);
+    let mut data = pod_body.into_inner();
+    //判断是否有 data.metadata.resourceVersion
+    if data.metadata.resource_version.is_none() {
+        match pod_api.get(name).await {
+            Ok(host) => {
+                data.metadata.resource_version = host.metadata.resource_version;
+            }
+            Err(err) => {
+                return json!({
+                    "code": 400,
+                    "message": get_root_error(&err).to_string(),
+                });
+            }
+        }
+    }
+    let params = PostParams::default();
+    match pod_api.replace(name, &params, &data).await {
         Ok(pod) => json!(&pod),
         Err(err) => {
             json!({
@@ -62,9 +75,9 @@ pub async fn update_pod(name: &str, ns: &str, pod_body: Json<Pod>) -> Value {
 
 pub async fn delete_pod(name: &str, ns: &str) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
-    let pods: Api<Pod> = Api::namespaced(client, ns);
+    let pod_api: Api<Pod> = Api::namespaced(client, ns);
     let params = DeleteParams::default();
-    match pods.delete(name, &params).await {
+    match pod_api.delete(name, &params).await {
         Ok(resp) => match &resp.left() {
             Some(pod) => json!(pod),
             None => json!({

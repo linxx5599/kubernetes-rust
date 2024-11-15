@@ -31,10 +31,10 @@ pub async fn get_host(params: utils::PaginationParams) -> Value {
 
 pub async fn create_host(host_body: Json<host::Host>) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
-    let hosts: Api<host::Host> = Api::all(client);
+    let host_api: Api<host::Host> = Api::all(client);
     let data = host_body.into_inner();
     let params = PostParams::default();
-    match hosts.create(&params, &data).await {
+    match host_api.create(&params, &data).await {
         Ok(host) => json!(&host),
         Err(err) => {
             json!({
@@ -77,9 +77,9 @@ pub async fn update_host(name: &str, host_body: Json<host::Host>) -> Value {
 
 pub async fn delete_host(name: &str) -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
-    let hosts: Api<host::Host> = Api::all(client);
+    let host_api: Api<host::Host> = Api::all(client);
     let params = DeleteParams::default();
-    match hosts.delete(name, &params).await {
+    match host_api.delete(name, &params).await {
         Ok(resp) => match &resp.left() {
             Some(host) => json!(host),
             None => json!({
