@@ -3,7 +3,6 @@ use k8s_openapi::api::core::v1::Pod;
 use rocket::{delete, get, post, put, routes, serde::json::Json, Route};
 use serde_json::{json, Value};
 
-#[path = "./pod_service.rs"]
 mod pod_service;
 
 #[get("/pod")]

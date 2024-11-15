@@ -3,7 +3,7 @@ use crate::utils;
 use rocket::serde::json::Json;
 use rocket::{delete, get, post, put, routes, Route};
 use serde_json::{json, Value};
-#[path = "./host_service.rs"]
+
 mod host_service;
 
 #[get("/host?<limit>")]

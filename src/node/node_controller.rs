@@ -5,7 +5,6 @@ use serde_json::{json, Value};
 
 use crate::utils;
 
-#[path = "./node_service.rs"]
 mod node_service;
 
 #[get("/node")]

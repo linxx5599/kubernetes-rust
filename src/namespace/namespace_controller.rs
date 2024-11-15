@@ -5,7 +5,6 @@ use serde_json::{json, Value};
 
 use crate::utils;
 
-#[path = "./namespace_service.rs"]
 mod namespace_service;
 
 #[get("/namespace")]
